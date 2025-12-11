@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { useState } from 'react'
 import { HeadContent, Link, Outlet, Scripts, createRootRoute, useRouter } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
