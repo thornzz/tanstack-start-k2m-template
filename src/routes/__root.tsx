@@ -15,7 +15,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start',
+        title: 'K2m Tanstack Start',
       },
     ],
     links: [
