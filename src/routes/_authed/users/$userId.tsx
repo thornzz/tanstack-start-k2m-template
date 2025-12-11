@@ -1,5 +1,6 @@
-import { createFileRoute, Link, notFound } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { getUserById, type AppUser } from '../../../functions/users'
+import { DefaultErrorComponent } from '@/components/DefaultErrorComponent'
 
 // User type from auth server
 type AuthUser = {
@@ -9,22 +10,22 @@ type AuthUser = {
     role?: string
 }
 
+// Custom error for user not found - allows errorComponent to handle it
+
 /**
  * User detail page - Protected by _authed layout
- * No need for individual auth checks - parent layout handles it
+ * Workaround: Using Error + errorComponent instead of notFound() due to TanStack Start SSR bug #5960
  */
 export const Route = createFileRoute('/_authed/users/$userId')({
     loader: async ({ params: { userId } }) => {
         const user = await getUserById({ data: { userId } })
         if (!user) {
-            throw notFound()
+            throw new Error(`User with ID ${userId} not found`)
         }
         return user
     },
     component: UserDetailPage,
-    errorComponent: () => {
-        return <p>Post not found!</p>
-    },
+    errorComponent: DefaultErrorComponent,
 })
 
 function UserDetailPage() {
