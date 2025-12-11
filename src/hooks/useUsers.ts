@@ -1,18 +1,20 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { getUsers, getUserById, type AppUser } from '../functions/users'
+import { getUsers, getUserById } from '../functions/users'
+import { QUERY_KEYS } from '../constants'
+import type { AppUser } from '../types'
 
 /**
  * TanStack Start'ta custom hook oluşturma örneği
  * 
  * Bu hook, kullanıcı verilerini yönetmek için kullanılır.
  * Server functions ile TanStack Query'yi birleştirir.
+ * 
+ * NOT: Query options için src/queries/users.ts dosyasını kullanabilirsiniz.
  */
 
-// Query Keys - Tutarlı cache yönetimi için
-export const userQueryKeys = {
-    all: ['users'] as const,
-    detail: (id: string) => ['users', 'detail', id] as const,
-}
+// Query Keys - Centralized constants'tan alınır
+// Legacy uyumluluk için export ediliyor
+export const userQueryKeys = QUERY_KEYS.users
 
 /**
  * Tüm kullanıcıları getiren hook

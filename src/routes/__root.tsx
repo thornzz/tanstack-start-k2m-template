@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import { HeadContent, Link, Outlet, Scripts, createRootRoute, useRouter } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-
+//import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+//import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import appCss from '../styles/app.css?url'
 import { authClient } from '../lib/auth-client'
 import { NotFoundComponent } from '@/components/NotFoundComponent'
@@ -116,6 +117,8 @@ function RootComponent() {
             )}
           </nav>
           <Outlet />
+          {/* <TanStackRouterDevtools position="bottom-right" />
+          <ReactQueryDevtools buttonPosition="bottom-left" /> */}
           <Scripts />
         </body>
       </html>

@@ -2,17 +2,10 @@ import { createServerFn } from '@tanstack/react-start'
 import { db } from '../db'
 import { appUsers } from '../db/schema'
 import { eq } from 'drizzle-orm'
+import type { AppUser } from '../types'
 
-// Type for app users from database
-export type AppUser = {
-    id: number
-    name: string
-    email: string
-    role: string
-    status: string
-    createdAt: Date
-    updatedAt: Date
-}
+// Re-export type for backward compatibility
+export type { AppUser }
 
 // Server function to fetch all users from database
 export const getUsers = createServerFn().handler(async () => {
