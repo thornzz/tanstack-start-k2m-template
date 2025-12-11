@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { getUsers, type AppUser } from '../../../functions/users'
+import { useUsers } from '../../../hooks/useUsers'
+import { type AppUser } from '../../../functions/users'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -14,16 +15,49 @@ type AuthUser = {
 /**
  * Users list page - Protected by _authed layout
  * No need for individual auth checks - parent layout handles it
+ * 
+ * useUsers hook'u kullanılarak veri çekiliyor.
+ * Bu sayede TanStack Query'nin cache, refetch ve loading state yönetimi kullanılıyor.
  */
 export const Route = createFileRoute('/_authed/users/')({
-    loader: () => getUsers(),
     component: UsersPage,
 })
 
 function UsersPage() {
-    const users = Route.useLoaderData()
+    // useUsers hook'u ile veri çekme
+    const { users, isLoading, error, refetch } = useUsers()
     // Get user from parent route context
     const { user } = Route.useRouteContext() as { user: AuthUser }
+
+    // Loading durumu
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-8 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4" />
+                    <p className="text-gray-400">Kullanıcılar yükleniyor...</p>
+                </div>
+            </div>
+        )
+    }
+
+    // Error durumu
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-8 flex items-center justify-center">
+                <div className="text-center bg-red-500/10 border border-red-500/20 rounded-lg p-8 max-w-md">
+                    <p className="text-red-400 font-semibold mb-2">Hata Oluştu</p>
+                    <p className="text-gray-400 text-sm mb-4">{error.message}</p>
+                    <Button
+                        onClick={() => refetch()}
+                        className="bg-red-500/20 hover:bg-red-500/30 text-red-400"
+                    >
+                        Tekrar Dene
+                    </Button>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-8">
@@ -33,11 +67,20 @@ function UsersPage() {
                         <h1 className="text-4xl font-bold text-white">Kullanıcılar</h1>
                         <p className="text-gray-400 mt-1">Hoş geldin, {user?.name || user?.email}</p>
                     </div>
-                    <Button asChild variant="secondary" className="bg-slate-700 hover:bg-slate-600 text-white">
-                        <Link to="/">
-                            Ana Sayfa
-                        </Link>
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            onClick={() => refetch()}
+                            variant="secondary"
+                            className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400"
+                        >
+                            Yenile
+                        </Button>
+                        <Button asChild variant="secondary" className="bg-slate-700 hover:bg-slate-600 text-white">
+                            <Link to="/">
+                                Ana Sayfa
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
 
                 <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700 overflow-hidden">
@@ -103,7 +146,7 @@ function UsersPage() {
                 </Card>
 
                 <p className="mt-6 text-gray-500 text-center text-sm">
-                    Database'den {users.length} kullanıcı yüklendi
+                    Database'den {users.length} kullanıcı yüklendi (useUsers hook ile)
                 </p>
             </div>
         </div>

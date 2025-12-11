@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { HeadContent, Link, Outlet, Scripts, createRootRoute, useRouter } from '@tanstack/react-router'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import appCss from '../styles/app.css?url'
 import { authClient } from '../lib/auth-client'
@@ -32,6 +34,20 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  // SSR için her request'te yeni QueryClient oluştur
+  // staleTime: 60 saniye - SSR sonrası client'ta hemen refetch yapılmasını önler
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000, // 1 dakika
+            refetchOnWindowFocus: false,
+          },
+        },
+      }),
+  )
+
   const { data: session, isPending } = authClient.useSession()
   const router = useRouter()
 
@@ -46,46 +62,48 @@ function RootComponent() {
   }
 
   return (
-    <html lang="tr">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <nav className="p-3 flex gap-2 text-lg border-b border-slate-700 items-center justify-between bg-slate-900/80 backdrop-blur-sm">
-          <div className="flex gap-4">
-            <Link to="/" className="[&.active]:text-cyan-400 text-gray-300 hover:text-cyan-400 transition-colors font-medium">
-              Ana Sayfa
-            </Link>
-            {!isPending && session && (
-              <Link to="/users" className="[&.active]:text-cyan-400 text-gray-300 hover:text-cyan-400 transition-colors font-medium">
-                Kullanıcılar
+    <QueryClientProvider client={queryClient}>
+      <html lang="tr">
+        <head>
+          <HeadContent />
+        </head>
+        <body>
+          <nav className="p-3 flex gap-2 text-lg border-b border-slate-700 items-center justify-between bg-slate-900/80 backdrop-blur-sm">
+            <div className="flex gap-4">
+              <Link to="/" className="[&.active]:text-cyan-400 text-gray-300 hover:text-cyan-400 transition-colors font-medium">
+                Ana Sayfa
               </Link>
-            )}
-            {!isPending && !session && (
-              <Link to="/login" className="[&.active]:text-cyan-400 text-gray-300 hover:text-cyan-400 transition-colors font-medium">
-                Giriş
-              </Link>
-            )}
-          </div>
-          {!isPending && session && (
-            <div className="flex items-center gap-4">
-              <div className="text-sm">
-                <div className="font-bold text-white">{session.user.name}</div>
-                <div className="text-gray-400">{session.user.email}</div>
-              </div>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleLogout}
-              >
-                Çıkış
-              </Button>
+              {!isPending && session && (
+                <Link to="/users" className="[&.active]:text-cyan-400 text-gray-300 hover:text-cyan-400 transition-colors font-medium">
+                  Kullanıcılar
+                </Link>
+              )}
+              {!isPending && !session && (
+                <Link to="/login" className="[&.active]:text-cyan-400 text-gray-300 hover:text-cyan-400 transition-colors font-medium">
+                  Giriş
+                </Link>
+              )}
             </div>
-          )}
-        </nav>
-        <Outlet />
-        <Scripts />
-      </body>
-    </html>
+            {!isPending && session && (
+              <div className="flex items-center gap-4">
+                <div className="text-sm">
+                  <div className="font-bold text-white">{session.user.name}</div>
+                  <div className="text-gray-400">{session.user.email}</div>
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleLogout}
+                >
+                  Çıkış
+                </Button>
+              </div>
+            )}
+          </nav>
+          <Outlet />
+          <Scripts />
+        </body>
+      </html>
+    </QueryClientProvider>
   )
 }
