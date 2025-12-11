@@ -1,26 +1,13 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
+import { getUserById, type AppUser } from '../../../functions/users'
 
-// Mock user data (same as users.index.tsx - in real app this would be in a shared file)
-const mockUsers = [
-    { id: 1, name: 'Ahmet Yılmaz', email: 'ahmet@example.com', role: 'Admin', status: 'Aktif' },
-    { id: 2, name: 'Ayşe Demir', email: 'ayse@example.com', role: 'User', status: 'Aktif' },
-    { id: 3, name: 'Mehmet Kaya', email: 'mehmet@example.com', role: 'Editor', status: 'Pasif' },
-    { id: 4, name: 'Fatma Çelik', email: 'fatma@example.com', role: 'User', status: 'Aktif' },
-    { id: 5, name: 'Ali Öztürk', email: 'ali@example.com', role: 'Admin', status: 'Aktif' },
-]
-
-// Server function to fetch user by ID - returns user or null
-const getUserById = createServerFn()
-    .inputValidator((data: { userId: string }) => data)
-    .handler(async ({ data }) => {
-        // Simulate server delay
-        await new Promise((resolve) => setTimeout(resolve, 100))
-        console.log(`[Server] Fetching user with ID: ${data.userId}`)
-
-        const user = mockUsers.find((u) => u.id === Number(data.userId))
-        return user || null
-    })
+// User type from auth server
+type AuthUser = {
+    userId: string
+    email?: string
+    name?: string
+    role?: string
+}
 
 /**
  * User detail page - Protected by _authed layout
@@ -35,27 +22,13 @@ export const Route = createFileRoute('/_authed/users/$userId')({
         return user
     },
     component: UserDetailPage,
+    errorComponent: () => {
+        return <p>Post not found!</p>
+    },
 })
 
-// User type from auth server
-type AuthUser = {
-    userId: string
-    email?: string
-    name?: string
-    role?: string
-}
-
-// User type from mock data
-type MockUser = {
-    id: number
-    name: string
-    email: string
-    role: string
-    status: string
-}
-
 function UserDetailPage() {
-    const user = Route.useLoaderData() as MockUser
+    const user = Route.useLoaderData() as AppUser
     // Get authenticated user from parent route context
     const { user: authUser } = Route.useRouteContext() as { user: AuthUser }
 
@@ -129,7 +102,7 @@ function UserDetailPage() {
                 </div>
 
                 <p className="mt-6 text-gray-500 text-center text-sm">
-                    Server function ile kullanıcı #{user.id} yüklendi
+                    Database'den kullanıcı #{user.id} yüklendi
                 </p>
             </div>
         </div>

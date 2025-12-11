@@ -1,4 +1,15 @@
-import { pgTable, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, timestamp, serial } from "drizzle-orm/pg-core";
+
+// App users table - for the users list page (separate from auth users)
+export const appUsers = pgTable("app_users", {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull().unique(),
+    role: text("role").notNull(), // Admin, User, Editor
+    status: text("status").notNull(), // Aktif, Pasif
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow()
+});
 
 export const user = pgTable("user", {
     id: text("id").primaryKey(),

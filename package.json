@@ -6,7 +6,8 @@
     "dev": "vite dev --port 3000",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:seed": "npx tsx src/db/seed.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",

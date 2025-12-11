@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { getUsers } from '../../functions/users'
+import { getUsers, type AppUser } from '../../../functions/users'
 
 // User type from auth server
 type AuthUser = {
@@ -52,7 +52,7 @@ function UsersPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-700">
-                            {users.map((user) => (
+                            {users.map((user: AppUser) => (
                                 <tr key={user.id} className="hover:bg-slate-700/30 transition-colors">
                                     <td className="px-6 py-4 text-gray-300">{user.id}</td>
                                     <td className="px-6 py-4 text-white font-medium">{user.name}</td>
@@ -95,7 +95,7 @@ function UsersPage() {
                 </div>
 
                 <p className="mt-6 text-gray-500 text-center text-sm">
-                    Server function ile {users.length} kullanıcı yüklendi
+                    Database'den {users.length} kullanıcı yüklendi
                 </p>
             </div>
         </div>

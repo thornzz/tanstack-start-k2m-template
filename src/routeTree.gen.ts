@@ -13,9 +13,9 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthedUsersIndexRouteImport } from './routes/_authed/users.index'
+import { Route as AuthedUsersIndexRouteImport } from './routes/_authed/users/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as AuthedUsersUserIdRouteImport } from './routes/_authed/users.$userId'
+import { Route as AuthedUsersUserIdRouteImport } from './routes/_authed/users/$userId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',

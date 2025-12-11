@@ -2,6 +2,7 @@ import { HeadContent, Link, Outlet, Scripts, createRootRoute, useRouter } from '
 
 import appCss from '../styles/app.css?url'
 import { authClient } from '../lib/auth-client'
+import { NotFoundComponent } from '@/components/NotFoundComponent'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -26,6 +27,7 @@ export const Route = createRootRoute({
   }),
 
   component: RootComponent,
+  notFoundComponent: NotFoundComponent,
 })
 
 function RootComponent() {

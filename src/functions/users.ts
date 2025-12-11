@@ -1,18 +1,43 @@
 import { createServerFn } from '@tanstack/react-start'
+import { db } from '../db'
+import { appUsers } from '../db/schema'
+import { eq } from 'drizzle-orm'
 
-// Mock user data
-const mockUsers = [
-    { id: 1, name: 'Ahmet Yılmaz', email: 'ahmet@example.com', role: 'Admin', status: 'Aktif' },
-    { id: 2, name: 'Ayşe Demir', email: 'ayse@example.com', role: 'User', status: 'Aktif' },
-    { id: 3, name: 'Mehmet Kaya', email: 'mehmet@example.com', role: 'Editor', status: 'Pasif' },
-    { id: 4, name: 'Fatma Çelik', email: 'fatma@example.com', role: 'User', status: 'Aktif' },
-    { id: 5, name: 'Ali Öztürk', email: 'ali@example.com', role: 'Admin', status: 'Aktif' },
-]
+// Type for app users from database
+export type AppUser = {
+    id: number
+    name: string
+    email: string
+    role: string
+    status: string
+    createdAt: Date
+    updatedAt: Date
+}
 
-// Server function to fetch all users
+// Server function to fetch all users from database
 export const getUsers = createServerFn().handler(async () => {
-    // Simulate server delay
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    console.log('[Server] Fetching all users...')
-    return mockUsers
+    console.log('[Server] Fetching all users from database...')
+    const users = await db.select().from(appUsers)
+    return users
 })
+
+// Server function to fetch user by ID from database
+export const getUserById = createServerFn({ method: 'GET' })
+    .inputValidator((data: unknown): { userId: string } => {
+        const input = data as { userId: string }
+        if (!input || typeof input.userId !== 'string') {
+            throw new Error('Invalid userId')
+        }
+        return input
+    })
+    .handler(async ({ data }) => {
+        console.log(`[Server] Fetching user with ID: ${data.userId}`)
+
+        const userId = Number(data.userId)
+        if (isNaN(userId)) {
+            return null
+        }
+
+        const users = await db.select().from(appUsers).where(eq(appUsers.id, userId))
+        return users[0] || null
+    })
