@@ -1,11 +1,18 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { getUsers } from '../functions/users'
 import { authMiddleware } from '../lib/middleware'
+import { authClient } from '../lib/auth-client'
 
-export const Route = createFileRoute('/users')({
+export const Route = createFileRoute('/users/')({
+    beforeLoad: async () => {
+        // Client-side protection: check session before loading
+        const { data: session } = await authClient.getSession()
+        if (!session) {
+            throw redirect({ to: '/login' })
+        }
+    },
     loader: () => getUsers(),
     component: UsersPage,
-    // @ts-ignore
     server: {
         middleware: [authMiddleware]
     }

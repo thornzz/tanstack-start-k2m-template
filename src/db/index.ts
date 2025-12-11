@@ -32,3 +32,15 @@ function getDb(): BunSQLiteDatabase<typeof schema> {
 }
 
 export const db = getDb();
+
+// Hot reload cleanup - close connection before module is replaced
+if (import.meta.hot) {
+    import.meta.hot.dispose(() => {
+        console.log('[DB] Hot reload detected, closing SQLite connection');
+        if (globalForDb._sqlite_conn) {
+            globalForDb._sqlite_conn.close();
+            globalForDb._sqlite_conn = undefined;
+            globalForDb._drizzle_db = undefined;
+        }
+    });
+}

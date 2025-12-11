@@ -1,6 +1,6 @@
-import { createFileRoute, Link, notFound } from '@tanstack/react-router'
+import { createFileRoute, Link, notFound, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { authMiddleware } from '../lib/middleware'
+import { authClient } from '../lib/auth-client'
 
 // Mock user data (same as users.index.tsx - in real app this would be in a shared file)
 const mockUsers = [
@@ -22,6 +22,25 @@ const getUserById = createServerFn()
         const user = mockUsers.find((u) => u.id === Number(data.userId))
         return user || null
     })
+
+export const Route = createFileRoute('/users/$userId')({
+    beforeLoad: async () => {
+        // Client-side protection: check session before loading
+        const { data: session } = await authClient.getSession()
+        if (!session) {
+            throw redirect({ to: '/login' })
+        }
+    },
+    loader: async ({ params: { userId } }) => {
+        const user = await getUserById({ data: { userId } })
+        if (!user) {
+            throw notFound()
+        }
+        return user
+    },
+    component: UserDetailPage,
+
+})
 
 function UserDetailPage() {
     const user = Route.useLoaderData()
@@ -99,18 +118,3 @@ function UserDetailPage() {
         </div>
     )
 }
-
-export const Route = createFileRoute('/users/$userId')({
-    loader: async ({ params: { userId } }) => {
-        const user = await getUserById({ data: { userId } })
-        if (!user) {
-            throw notFound()
-        }
-        return user
-    },
-    component: UserDetailPage,
-    // @ts-ignore
-    server: {
-        middleware: [authMiddleware]
-    }
-})

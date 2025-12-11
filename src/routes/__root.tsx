@@ -39,7 +39,6 @@ function RootComponent() {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.invalidate()
           router.navigate({ to: '/login' })
         },
         onError: (ctx) => {
@@ -58,9 +57,11 @@ function RootComponent() {
         <div className="p-2 flex gap-2 text-lg border-b items-center justify-between">
           <div className="flex gap-2">
             <a href="/" className="[&.active]:font-bold">Home</a>
-            {!session && <a href="/login" className="[&.active]:font-bold">Login</a>}
+            {/* Only show Login link when we're sure there's no session (not during loading) */}
+            {!isPending && !session && <a href="/login" className="[&.active]:font-bold">Login</a>}
           </div>
-          {session && (
+          {/* Only show user info when session is loaded and exists */}
+          {!isPending && session && (
             <div className="flex items-center gap-4">
               <div className="text-sm">
                 <div className="font-bold">{session.user.name}</div>
