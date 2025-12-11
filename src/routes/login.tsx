@@ -1,6 +1,10 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { authClient } from '../lib/auth-client'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const Route = createFileRoute('/login')({
     component: Login,
@@ -33,7 +37,6 @@ function Login() {
                     onSuccess: () => {
                         setLoading(false)
                         setIsSignUp(false)
-                        // Optionally auto login or show message
                     },
                     onError: (ctx) => {
                         setLoading(false)
@@ -59,30 +62,29 @@ function Login() {
                 })
             }
         } catch (err: any) {
-            // Better auth handles errors in callbacks usually, but just in case
             setLoading(false)
             setError(err.message || "An error occurred")
         }
     }
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    {isSignUp ? 'Create your account' : 'Sign in to your account'}
-                </h2>
-            </div>
-
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-                <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                    <form className="space-y-6" onSubmit={handleSubmit}>
-                        {isSignUp && (
-                            <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                    Name
-                                </label>
-                                <div className="mt-1">
-                                    <input
+                <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700">
+                    <CardHeader className="text-center">
+                        <CardTitle className="text-2xl text-white">
+                            {isSignUp ? 'Hesap Oluştur' : 'Giriş Yap'}
+                        </CardTitle>
+                        <CardDescription className="text-gray-400">
+                            {isSignUp ? 'Yeni hesabınız için bilgilerinizi girin' : 'Hesabınıza erişmek için giriş yapın'}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form className="space-y-4" onSubmit={handleSubmit}>
+                            {isSignUp && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="name" className="text-gray-300">İsim</Label>
+                                    <Input
                                         id="name"
                                         name="name"
                                         type="text"
@@ -90,18 +92,15 @@ function Login() {
                                         required
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                        placeholder="Adınız"
+                                        className="bg-slate-700/50 border-slate-600 text-white placeholder:text-gray-500 focus-visible:ring-cyan-500"
                                     />
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                Email address
-                            </label>
-                            <div className="mt-1">
-                                <input
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="text-gray-300">Email</Label>
+                                <Input
                                     id="email"
                                     name="email"
                                     type="email"
@@ -109,17 +108,14 @@ function Login() {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                    placeholder="ornek@email.com"
+                                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-gray-500 focus-visible:ring-cyan-500"
                                 />
                             </div>
-                        </div>
 
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                Password
-                            </label>
-                            <div className="mt-1">
-                                <input
+                            <div className="space-y-2">
+                                <Label htmlFor="password" className="text-gray-300">Şifre</Label>
+                                <Input
                                     id="password"
                                     name="password"
                                     type="password"
@@ -127,50 +123,50 @@ function Login() {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                    placeholder="••••••••"
+                                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-gray-500 focus-visible:ring-cyan-500"
                                 />
                             </div>
-                        </div>
 
-                        {error && (
-                            <div className="text-red-600 text-sm">
-                                {error}
-                            </div>
-                        )}
+                            {error && (
+                                <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                                    {error}
+                                </div>
+                            )}
 
-                        <div>
-                            <button
+                            <Button
                                 type="submit"
                                 disabled={loading}
-                                className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+                                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/30"
                             >
-                                {loading ? 'Processing...' : isSignUp ? 'Sign up' : 'Sign in'}
-                            </button>
-                        </div>
-                    </form>
+                                {loading ? 'İşleniyor...' : isSignUp ? 'Kayıt Ol' : 'Giriş Yap'}
+                            </Button>
+                        </form>
 
-                    <div className="mt-6">
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-300" />
+                        <div className="mt-6">
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-slate-700" />
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="bg-slate-800/50 px-2 text-gray-500">
+                                        veya
+                                    </span>
+                                </div>
                             </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="bg-white px-2 text-gray-500">
-                                    Or
-                                </span>
-                            </div>
-                        </div>
 
-                        <div className="mt-6 grid grid-cols-1 gap-3">
-                            <button
-                                onClick={() => setIsSignUp(!isSignUp)}
-                                className="flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50"
-                            >
-                                {isSignUp ? 'Sign in existing account' : 'Create new account'}
-                            </button>
+                            <div className="mt-6">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsSignUp(!isSignUp)}
+                                    className="w-full border-slate-600 text-gray-300 hover:bg-slate-700/50 hover:text-white"
+                                >
+                                    {isSignUp ? 'Mevcut hesaba giriş yap' : 'Yeni hesap oluştur'}
+                                </Button>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )

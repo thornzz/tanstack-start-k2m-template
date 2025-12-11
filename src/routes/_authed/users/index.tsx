@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { getUsers, type AppUser } from '../../../functions/users'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
 // User type from auth server
 type AuthUser = {
@@ -31,68 +33,74 @@ function UsersPage() {
                         <h1 className="text-4xl font-bold text-white">Kullanıcılar</h1>
                         <p className="text-gray-400 mt-1">Hoş geldin, {user?.name || user?.email}</p>
                     </div>
-                    <Link
-                        to="/"
-                        className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
-                    >
-                        Ana Sayfa
-                    </Link>
+                    <Button asChild variant="secondary" className="bg-slate-700 hover:bg-slate-600 text-white">
+                        <Link to="/">
+                            Ana Sayfa
+                        </Link>
+                    </Button>
                 </div>
 
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl overflow-hidden">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-slate-700/50">
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">ID</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">İsim</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">Email</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">Rol</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">Durum</th>
-                                <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-700">
-                            {users.map((user: AppUser) => (
-                                <tr key={user.id} className="hover:bg-slate-700/30 transition-colors">
-                                    <td className="px-6 py-4 text-gray-300">{user.id}</td>
-                                    <td className="px-6 py-4 text-white font-medium">{user.name}</td>
-                                    <td className="px-6 py-4 text-gray-400">{user.email}</td>
-                                    <td className="px-6 py-4">
-                                        <span
-                                            className={`px-3 py-1 rounded-full text-xs font-medium ${user.role === 'Admin'
-                                                ? 'bg-purple-500/20 text-purple-400'
-                                                : user.role === 'Editor'
-                                                    ? 'bg-blue-500/20 text-blue-400'
-                                                    : 'bg-gray-500/20 text-gray-400'
-                                                }`}
-                                        >
-                                            {user.role}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span
-                                            className={`px-3 py-1 rounded-full text-xs font-medium ${user.status === 'Aktif'
-                                                ? 'bg-green-500/20 text-green-400'
-                                                : 'bg-red-500/20 text-red-400'
-                                                }`}
-                                        >
-                                            {user.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <Link
-                                            to="/users/$userId"
-                                            params={{ userId: String(user.id) }}
-                                            className="px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg transition-colors text-sm"
-                                        >
-                                            Detay
-                                        </Link>
-                                    </td>
+                <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700 overflow-hidden">
+                    <CardContent className="p-0">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-slate-700/50">
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">ID</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">İsim</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">Email</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">Rol</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">Durum</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-cyan-400">İşlem</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className="divide-y divide-slate-700">
+                                {users.map((user: AppUser) => (
+                                    <tr key={user.id} className="hover:bg-slate-700/30 transition-colors">
+                                        <td className="px-6 py-4 text-gray-300">{user.id}</td>
+                                        <td className="px-6 py-4 text-white font-medium">{user.name}</td>
+                                        <td className="px-6 py-4 text-gray-400">{user.email}</td>
+                                        <td className="px-6 py-4">
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-medium ${user.role === 'Admin'
+                                                    ? 'bg-purple-500/20 text-purple-400'
+                                                    : user.role === 'Editor'
+                                                        ? 'bg-blue-500/20 text-blue-400'
+                                                        : 'bg-gray-500/20 text-gray-400'
+                                                    }`}
+                                            >
+                                                {user.role}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-medium ${user.status === 'Aktif'
+                                                    ? 'bg-green-500/20 text-green-400'
+                                                    : 'bg-red-500/20 text-red-400'
+                                                    }`}
+                                            >
+                                                {user.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <Button
+                                                asChild
+                                                variant="ghost"
+                                                className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400"
+                                            >
+                                                <Link
+                                                    to="/users/$userId"
+                                                    params={{ userId: String(user.id) }}
+                                                >
+                                                    Detay
+                                                </Link>
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </CardContent>
+                </Card>
 
                 <p className="mt-6 text-gray-500 text-center text-sm">
                     Database'den {users.length} kullanıcı yüklendi
