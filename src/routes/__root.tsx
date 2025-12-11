@@ -1,6 +1,7 @@
-import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
+import { HeadContent, Link, Outlet, Scripts, createRootRoute, useRouter } from '@tanstack/react-router'
 
 import appCss from '../styles/app.css?url'
+import { authClient } from '../lib/auth-client'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -25,27 +26,24 @@ export const Route = createRootRoute({
   }),
 
   component: RootComponent,
-
 })
 
-import { authClient } from '../lib/auth-client'
-import { useRouter } from '@tanstack/react-router'
-
 function RootComponent() {
+  // Use better-auth client for session display (reactive)
   const { data: session, isPending } = authClient.useSession()
   const router = useRouter()
 
   const handleLogout = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.navigate({ to: '/login' })
-        },
-        onError: (ctx) => {
-          alert("Logout failed: " + ctx.error.message)
-        }
-      }
-    })
+    try {
+      // Sign out from better-auth (handles cookie cleanup via tanstackStartCookies plugin)
+      await authClient.signOut()
+      // Navigate to login page
+      router.navigate({ to: '/login' })
+    } catch (error) {
+      console.error('Logout error:', error)
+      // Still try to navigate even if there's an error
+      router.navigate({ to: '/login' })
+    }
   }
 
   return (
@@ -54,11 +52,22 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body>
-        <div className="p-2 flex gap-2 text-lg border-b items-center justify-between">
-          <div className="flex gap-2">
-            <a href="/" className="[&.active]:font-bold">Home</a>
-            {/* Only show Login link when we're sure there's no session (not during loading) */}
-            {!isPending && !session && <a href="/login" className="[&.active]:font-bold">Login</a>}
+        <nav className="p-2 flex gap-2 text-lg border-b items-center justify-between bg-slate-50">
+          <div className="flex gap-4">
+            <Link to="/" className="[&.active]:font-bold hover:text-cyan-600 transition-colors">
+              Home
+            </Link>
+            {!isPending && session && (
+              <Link to="/users" className="[&.active]:font-bold hover:text-cyan-600 transition-colors">
+                Users
+              </Link>
+            )}
+            {/* Only show Login link when we're sure there's no session */}
+            {!isPending && !session && (
+              <Link to="/login" className="[&.active]:font-bold hover:text-cyan-600 transition-colors">
+                Login
+              </Link>
+            )}
           </div>
           {/* Only show user info when session is loaded and exists */}
           {!isPending && session && (
@@ -69,13 +78,13 @@ function RootComponent() {
               </div>
               <button
                 onClick={handleLogout}
-                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm transition-colors"
               >
                 Logout
               </button>
             </div>
           )}
-        </div>
+        </nav>
         <Outlet />
         <Scripts />
       </body>

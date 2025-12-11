@@ -1,6 +1,5 @@
-import { createFileRoute, Link, notFound, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { authClient } from '../lib/auth-client'
 
 // Mock user data (same as users.index.tsx - in real app this would be in a shared file)
 const mockUsers = [
@@ -23,14 +22,11 @@ const getUserById = createServerFn()
         return user || null
     })
 
-export const Route = createFileRoute('/users/$userId')({
-    beforeLoad: async () => {
-        // Client-side protection: check session before loading
-        const { data: session } = await authClient.getSession()
-        if (!session) {
-            throw redirect({ to: '/login' })
-        }
-    },
+/**
+ * User detail page - Protected by _authed layout
+ * No need for individual auth checks - parent layout handles it
+ */
+export const Route = createFileRoute('/_authed/users/$userId')({
     loader: async ({ params: { userId } }) => {
         const user = await getUserById({ data: { userId } })
         if (!user) {
@@ -39,11 +35,29 @@ export const Route = createFileRoute('/users/$userId')({
         return user
     },
     component: UserDetailPage,
-
 })
 
+// User type from auth server
+type AuthUser = {
+    userId: string
+    email?: string
+    name?: string
+    role?: string
+}
+
+// User type from mock data
+type MockUser = {
+    id: number
+    name: string
+    email: string
+    role: string
+    status: string
+}
+
 function UserDetailPage() {
-    const user = Route.useLoaderData()
+    const user = Route.useLoaderData() as MockUser
+    // Get authenticated user from parent route context
+    const { user: authUser } = Route.useRouteContext() as { user: AuthUser }
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-8">
@@ -55,7 +69,10 @@ function UserDetailPage() {
                     >
                         ← Geri
                     </Link>
-                    <h1 className="text-4xl font-bold text-white">Kullanıcı Detayı</h1>
+                    <div>
+                        <h1 className="text-4xl font-bold text-white">Kullanıcı Detayı</h1>
+                        <p className="text-gray-400 text-sm">Görüntüleyen: {authUser?.name || authUser?.email}</p>
+                    </div>
                 </div>
 
                 <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl overflow-hidden">

@@ -1,31 +1,36 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
-import { getUsers } from '../functions/users'
-import { authMiddleware } from '../lib/middleware'
-import { authClient } from '../lib/auth-client'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { getUsers } from '../../functions/users'
 
-export const Route = createFileRoute('/users/')({
-    beforeLoad: async () => {
-        // Client-side protection: check session before loading
-        const { data: session } = await authClient.getSession()
-        if (!session) {
-            throw redirect({ to: '/login' })
-        }
-    },
+// User type from auth server
+type AuthUser = {
+    userId: string
+    email?: string
+    name?: string
+    role?: string
+}
+
+/**
+ * Users list page - Protected by _authed layout
+ * No need for individual auth checks - parent layout handles it
+ */
+export const Route = createFileRoute('/_authed/users/')({
     loader: () => getUsers(),
     component: UsersPage,
-    server: {
-        middleware: [authMiddleware]
-    }
 })
 
 function UsersPage() {
     const users = Route.useLoaderData()
+    // Get user from parent route context
+    const { user } = Route.useRouteContext() as { user: AuthUser }
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-8">
             <div className="max-w-6xl mx-auto">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-4xl font-bold text-white">Kullanıcılar</h1>
+                    <div>
+                        <h1 className="text-4xl font-bold text-white">Kullanıcılar</h1>
+                        <p className="text-gray-400 mt-1">Hoş geldin, {user?.name || user?.email}</p>
+                    </div>
                     <Link
                         to="/"
                         className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
