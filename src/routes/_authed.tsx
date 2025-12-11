@@ -1,12 +1,20 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { authMiddleware } from '../lib/middleware'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
+import { authMiddleware, getSessionFn } from '../lib/middleware'
 
 /**
  * Protected routes layout
- * Better Auth TanStack documentation: Use server middleware for route protection
- * All routes under /_authed/ will be automatically protected
+ * - server.middleware: Protects SSR (initial page load, hard refresh)
+ * - beforeLoad: Protects client-side navigation (link clicks)
  */
 export const Route = createFileRoute('/_authed')({
+    beforeLoad: async () => {
+        const session = await getSessionFn();
+        if (!session) {
+            throw redirect({ to: "/login" });
+        }
+        // Provide user data to child routes via context
+        return { user: session.user };
+    },
     component: AuthedLayout,
     server: {
         middleware: [authMiddleware],
@@ -16,3 +24,4 @@ export const Route = createFileRoute('/_authed')({
 function AuthedLayout() {
     return <Outlet />
 }
+
