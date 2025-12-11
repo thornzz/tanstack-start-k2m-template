@@ -4,7 +4,6 @@ import { authClient } from '../lib/auth-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const Route = createFileRoute('/login')({
     component: Login,
@@ -63,110 +62,126 @@ function Login() {
             }
         } catch (err: any) {
             setLoading(false)
-            setError(err.message || "An error occurred")
+            setError(err.message || "Bir hata oluştu")
         }
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center py-12 sm:px-6 lg:px-8">
-            <div className="sm:mx-auto sm:w-full sm:max-w-md">
-                <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700">
-                    <CardHeader className="text-center">
-                        <CardTitle className="text-2xl text-white">
-                            {isSignUp ? 'Hesap Oluştur' : 'Giriş Yap'}
-                        </CardTitle>
-                        <CardDescription className="text-gray-400">
-                            {isSignUp ? 'Yeni hesabınız için bilgilerinizi girin' : 'Hesabınıza erişmek için giriş yapın'}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form className="space-y-4" onSubmit={handleSubmit}>
-                            {isSignUp && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="name" className="text-gray-300">İsim</Label>
-                                    <Input
-                                        id="name"
-                                        name="name"
-                                        type="text"
-                                        autoComplete="name"
-                                        required
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        placeholder="Adınız"
-                                        className="bg-slate-700/50 border-slate-600 text-white placeholder:text-gray-500 focus-visible:ring-cyan-500"
-                                    />
-                                </div>
-                            )}
+        <div className="min-h-screen w-full flex bg-slate-50 dark:bg-slate-900">
+            {/* Left Side - Form */}
+            <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 sm:p-12 lg:p-24 bg-white dark:bg-slate-950">
 
-                            <div className="space-y-2">
-                                <Label htmlFor="email" className="text-gray-300">Email</Label>
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="ornek@email.com"
-                                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-gray-500 focus-visible:ring-cyan-500"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="password" className="text-gray-300">Şifre</Label>
-                                <Input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="••••••••"
-                                    className="bg-slate-700/50 border-slate-600 text-white placeholder:text-gray-500 focus-visible:ring-cyan-500"
-                                />
-                            </div>
-
-                            {error && (
-                                <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-                                    {error}
-                                </div>
-                            )}
-
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/30"
-                            >
-                                {loading ? 'İşleniyor...' : isSignUp ? 'Kayıt Ol' : 'Giriş Yap'}
-                            </Button>
-                        </form>
-
-                        <div className="mt-6">
-                            <div className="relative">
-                                <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t border-slate-700" />
-                                </div>
-                                <div className="relative flex justify-center text-sm">
-                                    <span className="bg-slate-800/50 px-2 text-gray-500">
-                                        veya
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="mt-6">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setIsSignUp(!isSignUp)}
-                                    className="w-full border-slate-600 text-gray-300 hover:bg-slate-700/50 hover:text-white"
-                                >
-                                    {isSignUp ? 'Mevcut hesaba giriş yap' : 'Yeni hesap oluştur'}
-                                </Button>
-                            </div>
+                {/* Main Form Content */}
+                <div className="w-full max-w-sm mx-auto space-y-8">
+                    {/* Logo Area - Mobile only or top of form */}
+                    <div className="flex items-center gap-2 mb-8">
+                        <div className="w-8 h-8 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+                            <div className="w-4 h-4 bg-white/20 rounded-full" />
                         </div>
-                    </CardContent>
-                </Card>
+                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300">
+                            K2M Tanstack Şablon
+                        </span>
+                    </div>
+
+                    <div className="space-y-2">
+                        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                            {isSignUp ? 'Hesap oluştur' : 'Hesabınıza giriş yapın'}
+                        </h1>
+                        <p className="text-slate-500 dark:text-slate-400">
+                            {isSignUp ? 'Hesabınızı oluşturmak için bilgilerinizi girin' : 'Lütfen bilgilerinizi girin'}
+                        </p>
+                    </div>
+
+                    <form className="space-y-6" onSubmit={handleSubmit}>
+                        {isSignUp && (
+                            <div className="space-y-2">
+                                <Label htmlFor="name">İsim</Label>
+                                <Input
+                                    id="name"
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="Adınız"
+                                    className="h-11"
+                                    required
+                                />
+                            </div>
+                        )}
+
+                        <div className="space-y-2">
+                            <Label htmlFor="email">E-posta</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="E-posta adresiniz"
+                                className="h-11"
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Şifre</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                className="h-11"
+                                required
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="text-red-500 text-sm bg-red-50 dark:bg-red-900/10 p-3 rounded-lg border border-red-100 dark:border-red-900/20">
+                                {error}
+                            </div>
+                        )}
+
+                        <Button
+                            type="submit"
+                            className="w-full h-11 bg-cyan-700 hover:bg-cyan-800 text-white shadow-sm transition-all"
+                            disabled={loading}
+                        >
+                            {loading ? 'İşleniyor...' : isSignUp ? 'Hesap Oluştur' : 'Giriş Yap'}
+                        </Button>
+                    </form>
+
+                    <div className="text-center text-sm">
+                        <span className="text-slate-500">
+                            {isSignUp ? 'Zaten hesabınız var mı?' : "Hesabınız yok mu?"}
+                        </span>{' '}
+                        <Button
+                            variant="link"
+                            className="p-0 h-auto font-medium text-cyan-600 hover:text-cyan-700 dark:text-cyan-400"
+                            onClick={() => setIsSignUp(!isSignUp)}
+                        >
+                            {isSignUp ? 'Giriş Yap' : 'Kayıt Ol'}
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Side - Image */}
+            <div className="hidden lg:block w-1/2 relative bg-slate-900">
+                <div className="absolute inset-0 bg-blue-900/30 mix-blend-multiply z-10" />
+                <img
+                    src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop"
+                    alt="Network Connection"
+                    className="w-full h-full object-cover opacity-80"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent z-20" />
+
+                <div className="absolute bottom-0 left-0 right-0 p-16 z-30 text-white font-light">
+                    <h2 className="text-4xl font-medium leading-tight max-w-lg mb-4">
+                        Geleceğin Teknolojisi ile Bağlanın
+                    </h2>
+                    <p className="text-lg text-slate-300 max-w-md">
+                        Güvenli, hızlı ve modern altyapı çözümleri.
+                    </p>
+                </div>
             </div>
         </div>
     )
