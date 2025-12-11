@@ -11,3 +11,12 @@ count.txt
 .output
 .vinxi
 todos.json
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+
+# Lock files (optional - some prefer to commit these)
+package-lock.json

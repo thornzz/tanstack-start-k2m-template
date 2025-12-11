@@ -1,9 +1,14 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { getUsers } from '../functions/users'
+import { authMiddleware } from '../lib/middleware'
 
 export const Route = createFileRoute('/users')({
     loader: () => getUsers(),
     component: UsersPage,
+    // @ts-ignore
+    server: {
+        middleware: [authMiddleware]
+    }
 })
 
 function UsersPage() {

@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { authMiddleware } from '../lib/middleware'
 
 // Mock user data (same as users.index.tsx - in real app this would be in a shared file)
 const mockUsers = [
@@ -22,22 +23,8 @@ const getUserById = createServerFn()
         return user || null
     })
 
-export const Route = createFileRoute('/users/$userId')({
-    loader: async ({ params }) => {
-        const user = await getUserById({ data: { userId: params.userId } })
-
-        // Kullanıcı bulunamazsa hata fırlat - Error Boundary yakalayacak
-        if (!user) {
-            throw new Error(`Kullanıcı bulunamadı: #${params.userId} ID'li kullanıcı mevcut değil.`)
-        }
-
-        return { user, userId: params.userId }
-    },
-    component: UserDetailPage,
-})
-
 function UserDetailPage() {
-    const { user } = Route.useLoaderData()
+    const user = Route.useLoaderData()
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-8">
@@ -112,3 +99,18 @@ function UserDetailPage() {
         </div>
     )
 }
+
+export const Route = createFileRoute('/users/$userId')({
+    loader: async ({ params: { userId } }) => {
+        const user = await getUserById({ data: { userId } })
+        if (!user) {
+            throw notFound()
+        }
+        return user
+    },
+    component: UserDetailPage,
+    // @ts-ignore
+    server: {
+        middleware: [authMiddleware]
+    }
+})
