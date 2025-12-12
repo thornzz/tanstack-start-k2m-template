@@ -81,7 +81,7 @@ export function UserList() {
                     <div className="grid gap-3">
                         {users.map((user: any) => (
                             <div
-                                key={user.id}
+                                key={user._id}
                                 className="group p-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-cyan-500/30 rounded-xl transition-all duration-200"
                             >
                                 <div className="flex items-center justify-between gap-4">
@@ -124,7 +124,7 @@ export function UserList() {
                                         >
                                             <Link
                                                 to="/users/$userId"
-                                                params={{ userId: String(user.id) }}
+                                                params={{ userId: user._id }}
                                             >
                                                 Detay &rarr;
                                             </Link>

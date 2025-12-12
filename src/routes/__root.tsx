@@ -1,13 +1,14 @@
 /// <reference types="vite/client" />
-import { useState } from 'react'
-import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient } from '@tanstack/react-query'
+import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router'
 //import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 //import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import appCss from '../styles/app.css?url'
 import { NotFoundComponent } from '@/components/NotFoundComponent'
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient
+}>()({
   head: () => ({
     meta: [
       {
@@ -48,33 +49,17 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
-  // SSR için her request'te yeni QueryClient oluştur
-  // staleTime: 60 saniye - SSR sonrası client'ta hemen refetch yapılmasını önler
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 60 * 1000, // 1 dakika
-            refetchOnWindowFocus: false,
-          },
-        },
-      }),
-  )
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <html lang="tr">
-        <head>
-          <HeadContent />
-        </head>
-        <body>
-          <Outlet />
-          {/* <TanStackRouterDevtools position="bottom-right" />
+    <html lang="tr">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <Outlet />
+        {/* <TanStackRouterDevtools position="bottom-right" />
           <ReactQueryDevtools buttonPosition="bottom-left" /> */}
-          <Scripts />
-        </body>
-      </html>
-    </QueryClientProvider>
+        <Scripts />
+      </body>
+    </html>
   )
 }

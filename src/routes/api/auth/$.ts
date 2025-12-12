@@ -1,15 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { auth } from '../../../lib/auth'
+
+// Auth API route - DISABLED until Convex Auth is implemented
+// Returns 503 Service Unavailable
 
 export const Route = createFileRoute('/api/auth/$')({
-    // @ts-ignore - server handlers are supported in TanStack Start but types might need update or ignore if conflict
+    // @ts-ignore
     server: {
         handlers: {
-            GET: ({ request }) => {
-                return auth.handler(request)
+            GET: () => {
+                return new Response(
+                    JSON.stringify({ error: 'Auth service temporarily disabled. Convex Auth will be implemented soon.' }),
+                    { status: 503, headers: { 'Content-Type': 'application/json' } }
+                )
             },
-            POST: ({ request }) => {
-                return auth.handler(request)
+            POST: () => {
+                return new Response(
+                    JSON.stringify({ error: 'Auth service temporarily disabled. Convex Auth will be implemented soon.' }),
+                    { status: 503, headers: { 'Content-Type': 'application/json' } }
+                )
             },
         }
     }

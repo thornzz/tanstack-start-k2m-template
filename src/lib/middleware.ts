@@ -1,25 +1,30 @@
 import { redirect } from "@tanstack/react-router";
 import { createMiddleware, createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { auth } from "./auth";
 
-// Server middleware for SSR protection
+// TODO: Re-enable when Convex Auth is implemented
+// Server middleware for SSR protection - DISABLED
 export const authMiddleware = createMiddleware().server(
-    async ({ next, request }) => {
-        const session = await auth.api.getSession({ headers: request.headers })
-        if (!session) {
-            throw redirect({ to: "/login" })
-        }
+    async ({ next }) => {
+        // Auth temporarily disabled - allow all requests
         return await next()
     }
 );
 
-// Server function to get session - callable from beforeLoad for client-side protection
+// Server function to get session - returns mock session for now
 export const getSessionFn = createServerFn({ method: "GET" }).handler(
     async () => {
-        const request = getRequest();
-        const session = await auth.api.getSession({ headers: request.headers });
-        return session;
+        // Return a mock session until Convex Auth is implemented
+        return {
+            user: {
+                id: 'temp-user',
+                name: 'Geçici Kullanıcı',
+                email: 'temp@example.com',
+                emailVerified: true,
+                image: null,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            }
+        };
     }
 );
-

@@ -1,35 +1,38 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { getUsers, getUserById } from '../functions/users'
+import { convexQuery } from '@convex-dev/react-query'
+import { api } from '../../convex/_generated/api'
 import { QUERY_KEYS } from '../constants'
-import type { AppUser } from '../types'
+import type { Id } from '../../convex/_generated/dataModel'
+import { useState, useMemo } from 'react'
 
 /**
- * TanStack Start'ta custom hook oluşturma örneği
- * 
- * Bu hook, kullanıcı verilerini yönetmek için kullanılır.
- * Server functions ile TanStack Query'yi birleştirir.
- * 
- * NOT: Query options için src/queries/users.ts dosyasını kullanabilirsiniz.
+ * Convex API ile kullanıcı verileri için custom hook'lar
  */
 
 // Query Keys - Centralized constants'tan alınır
 // Legacy uyumluluk için export ediliyor
 export const userQueryKeys = QUERY_KEYS.users
 
+// App User type for Convex
+export type ConvexAppUser = {
+    _id: Id<"appUsers">
+    _creationTime: number
+    name: string
+    email: string
+    role: string
+    status: string
+    createdAt: number
+    updatedAt: number
+}
+
 /**
  * Tüm kullanıcıları getiren hook
- * 
- * Kullanım:
- * ```tsx
- * const { users, isLoading, error, refetch } = useUsers()
- * ```
  */
 export function useUsers(page: number = 1, pageSize: number = 50, search: string = '') {
     const query = useQuery({
-        queryKey: [...userQueryKeys.all, { page, pageSize, search }],
-        queryFn: () => getUsers({ data: { page, pageSize, search } }),
+        ...convexQuery(api.users.get, { page, pageSize, search }),
         refetchInterval: 60 * 1000,
-        placeholderData: (previousData) => previousData, // Keep previous data while fetching new page
+        placeholderData: (previousData: any) => previousData,
     })
 
     return {
@@ -49,8 +52,7 @@ export function useUsers(page: number = 1, pageSize: number = 50, search: string
  */
 export function useUserById(userId: string | undefined) {
     const query = useQuery({
-        queryKey: userQueryKeys.detail(userId ?? ''),
-        queryFn: () => getUserById({ data: { userId: userId! } }),
+        ...convexQuery(api.users.getById, { id: userId as Id<"appUsers"> }),
         enabled: !!userId,
     })
 
@@ -66,7 +68,7 @@ export function useUserById(userId: string | undefined) {
 }
 
 /**
- * Kullanıcı oluşturma/güncelleme/silme işlemleri için mutation hook
+ * Kullanıcı cache işlemleri için hook
  */
 export function useUserMutations() {
     const queryClient = useQueryClient()
@@ -75,15 +77,8 @@ export function useUserMutations() {
         queryClient.invalidateQueries({ queryKey: userQueryKeys.all })
     }
 
-    const updateUserCache = (userId: string, updates: Partial<AppUser>) => {
-        // Optimistic update logic would need adjustment for paginated cache structure
-        // simplified invalidation is safer for now
-        invalidateUsers()
-    }
-
     return {
         invalidateUsers,
-        updateUserCache,
     }
 }
 
@@ -95,7 +90,6 @@ export function useUserSearch() {
     const [pageSize, setPageSize] = useState(50)
     const [searchTerm, setSearchTerm] = useState('')
 
-    // Debounce search term could be added here, but for now direct value
     const { users, meta, isLoading, error } = useUsers(page, pageSize, searchTerm)
 
     // Reset page when search changes
@@ -104,8 +98,8 @@ export function useUserSearch() {
     }, [searchTerm])
 
     return {
-        users, // Current page users
-        meta, // Pagination info
+        users,
+        meta,
         searchTerm,
         setSearchTerm,
         page,
@@ -116,6 +110,3 @@ export function useUserSearch() {
         error,
     }
 }
-
-// React'tan gerekli importlar (yukarıdaki useUserSearch için)
-import { useState, useMemo } from 'react'

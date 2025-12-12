@@ -1,36 +1,21 @@
-import { createFileRoute, Link, Outlet, redirect, useRouter } from '@tanstack/react-router'
-import { authMiddleware, getSessionFn } from '../lib/middleware'
-import { authClient } from '../lib/auth-client'
+import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
+import { getSessionFn } from '../lib/middleware'
 import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/_authed')({
     beforeLoad: async () => {
+        // Get session (currently returns mock user)
         const session = await getSessionFn();
-        if (!session) {
-            throw redirect({ to: "/login" });
-        }
-        return { user: session.user };
+        return { user: session?.user };
     },
     component: AuthedLayout,
-    server: {
-        middleware: [authMiddleware],
-    },
+    // Auth middleware disabled temporarily
+    // server: {
+    //     middleware: [authMiddleware],
+    // },
 })
 
 function AuthedLayout() {
-    const { data: session } = authClient.useSession()
-    const router = useRouter()
-
-    const handleLogout = async () => {
-        try {
-            await authClient.signOut()
-            router.navigate({ to: '/login' })
-        } catch (error) {
-            console.error('Logout error:', error)
-            router.navigate({ to: '/login' })
-        }
-    }
-
     return (
         <>
             <nav className="p-3 flex gap-2 text-lg border-b border-slate-700 items-center justify-between bg-slate-900/80 backdrop-blur-sm">
@@ -42,21 +27,12 @@ function AuthedLayout() {
                         Kullanıcılar
                     </Link>
                 </div>
-                {session && (
-                    <div className="flex items-center gap-4">
-                        <div className="text-sm">
-                            <div className="font-bold text-white">{session.user.name}</div>
-                            <div className="text-gray-400">{session.user.email}</div>
-                        </div>
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={handleLogout}
-                        >
-                            Çıkış
-                        </Button>
+                <div className="flex items-center gap-4">
+                    <div className="text-sm">
+                        <div className="font-bold text-white">Geçici Kullanıcı</div>
+                        <div className="text-gray-400 text-xs">Auth devre dışı</div>
                     </div>
-                )}
+                </div>
             </nav>
             <Outlet />
         </>
