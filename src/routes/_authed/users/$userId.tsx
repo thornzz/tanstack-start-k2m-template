@@ -3,14 +3,7 @@ import { getUserById, type AppUser } from '../../../functions/users'
 import { DefaultErrorComponent } from '@/components/DefaultErrorComponent'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-
-// User type from auth server
-type AuthUser = {
-    userId: string
-    email?: string
-    name?: string
-    role?: string
-}
+import { type AuthUser } from '../../../types'
 
 /**
  * User detail page - Protected by _authed layout
@@ -74,12 +67,12 @@ function UserDetailPage() {
                                     <td className="px-6 py-4 text-gray-400 font-medium">Rol</td>
                                     <td className="px-6 py-4">
                                         <span
-                                            className={`px-3 py-1 rounded-full text-xs font-medium ${user.role === 'Admin'
+                                            className={`px - 3 py - 1 rounded - full text - xs font - medium ${user.role === 'Admin'
                                                 ? 'bg-purple-500/20 text-purple-400'
                                                 : user.role === 'Editor'
                                                     ? 'bg-blue-500/20 text-blue-400'
                                                     : 'bg-gray-500/20 text-gray-400'
-                                                }`}
+                                                } `}
                                         >
                                             {user.role}
                                         </span>
@@ -89,10 +82,10 @@ function UserDetailPage() {
                                     <td className="px-6 py-4 text-gray-400 font-medium">Durum</td>
                                     <td className="px-6 py-4">
                                         <span
-                                            className={`px-3 py-1 rounded-full text-xs font-medium ${user.status === 'Aktif'
+                                            className={`px - 3 py - 1 rounded - full text - xs font - medium ${user.status === 'Aktif'
                                                 ? 'bg-green-500/20 text-green-400'
                                                 : 'bg-red-500/20 text-red-400'
-                                                }`}
+                                                } `}
                                         >
                                             {user.status}
                                         </span>

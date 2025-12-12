@@ -24,15 +24,17 @@ export const userQueryKeys = QUERY_KEYS.users
  * const { users, isLoading, error, refetch } = useUsers()
  * ```
  */
-export function useUsers() {
+export function useUsers(page: number = 1, pageSize: number = 50, search: string = '') {
     const query = useQuery({
-        queryKey: userQueryKeys.all,
-        queryFn: () => getUsers(),
-        refetchInterval: 60 * 1000, // 60 saniyede bir otomatik yenile
+        queryKey: [...userQueryKeys.all, { page, pageSize, search }],
+        queryFn: () => getUsers({ data: { page, pageSize, search } }),
+        refetchInterval: 60 * 1000,
+        placeholderData: (previousData) => previousData, // Keep previous data while fetching new page
     })
 
     return {
-        users: query.data ?? [],
+        users: query.data?.users ?? [],
+        meta: query.data?.meta,
         isLoading: query.isLoading,
         isFetching: query.isFetching,
         error: query.error,
@@ -44,17 +46,12 @@ export function useUsers() {
 
 /**
  * Belirli bir kullanıcıyı ID'ye göre getiren hook
- * 
- * Kullanım:
- * ```tsx
- * const { user, isLoading, error } = useUserById('123')
- * ```
  */
 export function useUserById(userId: string | undefined) {
     const query = useQuery({
         queryKey: userQueryKeys.detail(userId ?? ''),
         queryFn: () => getUserById({ data: { userId: userId! } }),
-        enabled: !!userId, // userId varsa sorguyu çalıştır
+        enabled: !!userId,
     })
 
     return {
@@ -70,34 +67,18 @@ export function useUserById(userId: string | undefined) {
 
 /**
  * Kullanıcı oluşturma/güncelleme/silme işlemleri için mutation hook
- * 
- * NOT: Bu örnek, mutation işlemlerinin nasıl yapılacağını gösterir.
- * Gerçek implementasyon için createServerFn ile mutation fonksiyonları oluşturmanız gerekir.
- * 
- * Kullanım:
- * ```tsx
- * const { deleteUser, isDeleting } = useUserMutations()
- * 
- * // Kullanıcı silme
- * deleteUser.mutate('123')
- * ```
  */
 export function useUserMutations() {
     const queryClient = useQueryClient()
 
-    // Örnek: Cache'i invalidate etme fonksiyonu
     const invalidateUsers = () => {
         queryClient.invalidateQueries({ queryKey: userQueryKeys.all })
     }
 
-    // Örnek: Cache'i manuel güncelleme (optimistic update)
     const updateUserCache = (userId: string, updates: Partial<AppUser>) => {
-        queryClient.setQueryData<AppUser[]>(userQueryKeys.all, (old) => {
-            if (!old) return old
-            return old.map(user =>
-                user.id === Number(userId) ? { ...user, ...updates } : user
-            )
-        })
+        // Optimistic update logic would need adjustment for paginated cache structure
+        // simplified invalidation is safer for now
+        invalidateUsers()
     }
 
     return {
@@ -107,36 +88,32 @@ export function useUserMutations() {
 }
 
 /**
- * Kullanıcı arama hook'u - Filtreleme için
- * 
- * Kullanım:
- * ```tsx
- * const { filteredUsers, setSearchTerm, searchTerm } = useUserSearch()
- * ```
+ * Kullanıcı listesi hook'u - Sayfalama ve Arama
  */
 export function useUserSearch() {
-    const { users, isLoading, error } = useUsers()
+    const [page, setPage] = useState(1)
+    const [pageSize, setPageSize] = useState(50)
     const [searchTerm, setSearchTerm] = useState('')
 
-    const filteredUsers = useMemo(() => {
-        if (!searchTerm.trim()) return users
+    // Debounce search term could be added here, but for now direct value
+    const { users, meta, isLoading, error } = useUsers(page, pageSize, searchTerm)
 
-        const lowerSearch = searchTerm.toLowerCase()
-        return users.filter(user =>
-            user.name.toLowerCase().includes(lowerSearch) ||
-            user.email.toLowerCase().includes(lowerSearch)
-        )
-    }, [users, searchTerm])
+    // Reset page when search changes
+    useMemo(() => {
+        if (searchTerm) setPage(1)
+    }, [searchTerm])
 
     return {
-        users,
-        filteredUsers,
+        users, // Current page users
+        meta, // Pagination info
         searchTerm,
         setSearchTerm,
+        page,
+        setPage,
+        pageSize,
+        setPageSize,
         isLoading,
         error,
-        resultCount: filteredUsers.length,
-        totalCount: users.length,
     }
 }
 
