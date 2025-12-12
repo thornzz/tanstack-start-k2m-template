@@ -1,6 +1,7 @@
+
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
-import { authClient } from '../lib/auth-client'
+import { useAuthActions } from "@convex-dev/auth/react";
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,6 +11,7 @@ export const Route = createFileRoute('/login')({
 })
 
 function Login() {
+    const { signIn } = useAuthActions();
     const [isSignUp, setIsSignUp] = useState(false)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -23,43 +25,20 @@ function Login() {
         setLoading(true)
         setError(null)
 
+        const flow = isSignUp ? "signUp" : "signIn";
+
         try {
-            if (isSignUp) {
-                await authClient.signUp.email({
-                    email,
-                    password,
-                    name,
-                }, {
-                    onRequest: () => {
-                        setLoading(true)
-                    },
-                    onSuccess: () => {
-                        setLoading(false)
-                        setIsSignUp(false)
-                    },
-                    onError: (ctx) => {
-                        setLoading(false)
-                        setError(ctx.error.message)
-                    }
+            await signIn("password", { email, password, name, flow })
+                .then(() => {
+                    console.log("Sign in successful!");
+                    window.alert("Giriş Başarılı!"); // Temporary alert to confirm execution
+                    setLoading(false)
+                    router.navigate({ to: '/' })
                 })
-            } else {
-                await authClient.signIn.email({
-                    email,
-                    password,
-                }, {
-                    onRequest: () => {
-                        setLoading(true)
-                    },
-                    onSuccess: () => {
-                        setLoading(false)
-                        router.navigate({ to: '/' })
-                    },
-                    onError: (ctx) => {
-                        setLoading(false)
-                        setError(ctx.error.message)
-                    }
-                })
-            }
+                .catch((err) => {
+                    setLoading(false)
+                    setError(err.message)
+                });
         } catch (err: any) {
             setLoading(false)
             setError(err.message || "Bir hata oluştu")

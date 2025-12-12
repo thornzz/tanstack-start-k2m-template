@@ -20,7 +20,7 @@ export type AppUser = {
     updatedAt: Date
 }
 
-// Auth user type (from better-auth user table)
+// Auth user type (from Convex Auth users table)
 export type AuthUser = {
     id: string
     name: string

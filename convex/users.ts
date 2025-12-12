@@ -103,6 +103,24 @@ export const seed = mutation({
             count++;
         }
 
-        return { message: "Seed completed", count };
     },
 });
+
+import { Id } from "./_generated/dataModel";
+
+// Get current authenticated user
+export const currentUser = query({
+    args: {},
+    handler: async (ctx) => {
+        const userId = await ctx.auth.getUserIdentity();
+        console.log("currentUser identity:", userId);
+        if (!userId) {
+            return null;
+        }
+        const user = await ctx.db.get(userId.subject as Id<"users">);
+        console.log("currentUser doc:", user);
+        return user;
+    },
+});
+
+

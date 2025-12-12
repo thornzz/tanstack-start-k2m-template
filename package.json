@@ -11,6 +11,8 @@
     "db:seed": "npx tsx src/db/seed.ts"
   },
   "dependencies": {
+    "@auth/core": "^0.37.0",
+    "@convex-dev/auth": "^0.0.90",
     "@convex-dev/react-query": "^0.1.0",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
