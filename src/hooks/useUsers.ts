@@ -1,66 +1,13 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { usePaginatedQuery } from 'convex/react'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '../../convex/_generated/api'
-import { QUERY_KEYS } from '../constants'
-import type { Id } from '../../convex/_generated/dataModel'
 import { useCallback, useMemo, useEffect } from 'react'
 import { useSearch, useNavigate } from '@tanstack/react-router'
 
 /**
  * Convex API ile kullanıcı verileri için custom hook'lar
  */
-
-// Query Keys - Centralized constants'tan alınır
-// Legacy uyumluluk için export ediliyor
-export const userQueryKeys = QUERY_KEYS.users
-
-// App User type for Convex
-export type ConvexAppUser = {
-    _id: Id<"appUsers">
-    _creationTime: number
-    name: string
-    email: string
-    role: string
-    status: string
-    createdAt: number
-    updatedAt: number
-}
-
-/**
- * Belirli bir kullanıcıyı ID'ye göre getiren hook
- */
-export function useUserById(userId: string | undefined) {
-    const query = useQuery({
-        ...convexQuery(api.appUsers.getById, { id: userId as Id<"appUsers"> }),
-        enabled: !!userId,
-    })
-
-    return {
-        user: query.data,
-        isLoading: query.isLoading,
-        isFetching: query.isFetching,
-        error: query.error,
-        refetch: query.refetch,
-        isError: query.isError,
-        isSuccess: query.isSuccess,
-    }
-}
-
-/**
- * Kullanıcı cache işlemleri için hook
- */
-export function useUserMutations() {
-    const queryClient = useQueryClient()
-
-    const invalidateUsers = () => {
-        queryClient.invalidateQueries({ queryKey: userQueryKeys.all })
-    }
-
-    return {
-        invalidateUsers,
-    }
-}
 
 // Default pagination - Convex'in default değeri 
 const DEFAULT_PAGE_SIZE = 25

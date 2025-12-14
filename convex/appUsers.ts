@@ -56,18 +56,6 @@ export const count = query({
     }
 });
 
-// DEPRECATED: Get all app users with pagination and optional search (Offset-based)
-export const get = query({
-    args: {
-        page: v.optional(v.number()),
-        pageSize: v.optional(v.number()),
-        search: v.optional(v.string()),
-    },
-    handler: async (_ctx, _args) => {
-        throw new Error("This query is deprecated. Please use 'list' or 'search' with cursor pagination.");
-    },
-});
-
 // Get a single app user by ID
 export const getById = query({
     args: {
