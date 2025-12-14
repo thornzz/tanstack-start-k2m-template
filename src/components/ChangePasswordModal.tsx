@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useAuthActions } from "@convex-dev/auth/react"
-import { useMutation } from 'convex/react'
 import { useAction } from 'convex/react'
 import { api } from '../../convex/_generated/api'
+import { translateAuthError } from '@/lib/authErrorTranslations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -42,39 +42,47 @@ export function ChangePasswordModal({ isOpen, onClose, userEmail }: ChangePasswo
 
         setLoading(true)
 
+        // Aşama 1: Mevcut şifre doğrulaması
+        let currentPasswordValid = false
         try {
-            // İlk olarak mevcut şifre ile giriş yapmayı dene (doğrulama için)
             await signIn("password", {
                 email: userEmail,
                 password: currentPassword,
                 flow: "signIn"
             })
-
-            // Mevcut şifre doğruysa, şifre değiştirme action'ını çağır
-            const result = await changePassword({
-                currentPassword,
-                newPassword,
-            })
-
-            if (result.success) {
-                setSuccess(true)
-                setTimeout(() => {
-                    onClose()
-                    resetForm()
-                }, 2000)
-            } else {
-                setError(result.error || 'Şifre değiştirilemedi')
-            }
-
-        } catch (err: any) {
-            if (err.message?.includes('InvalidSecret') || err.message?.includes('Invalid')) {
-                setError('Mevcut şifre yanlış')
-            } else {
-                setError(err.message || 'Bir hata oluştu')
-            }
-        } finally {
+            currentPasswordValid = true
+        } catch (signInErr: any) {
+            // ConvexError ile gelen hata kodunu çevir
+            console.error("Sign in error:", signInErr)
+            setError(translateAuthError(signInErr))
             setLoading(false)
+            return
         }
+
+        // Aşama 2: Şifre değiştirme
+        if (currentPasswordValid) {
+            try {
+                const result = await changePassword({
+                    currentPassword,
+                    newPassword,
+                })
+
+                if (result.success) {
+                    setSuccess(true)
+                    setTimeout(() => {
+                        onClose()
+                        resetForm()
+                    }, 2000)
+                } else {
+                    setError(result.error || 'Şifre değiştirilemedi')
+                }
+            } catch (changeErr: any) {
+                console.error("Password change error:", changeErr?.message)
+                setError("Şifre değiştirme işlemi başarısız oldu. Lütfen tekrar deneyin.")
+            }
+        }
+
+        setLoading(false)
     }
 
     const resetForm = () => {

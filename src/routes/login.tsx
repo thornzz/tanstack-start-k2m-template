@@ -2,6 +2,7 @@ import { createFileRoute, useRouter, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useAuthActions } from "@convex-dev/auth/react"
 import { Authenticated, AuthLoading } from 'convex/react'
+import { translateAuthError } from '@/lib/authErrorTranslations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -66,7 +67,7 @@ function LoginForm() {
             await signIn("password", { email, password, flow, name: isSignUp ? name : "" })
             router.navigate({ to: '/' })
         } catch (err: any) {
-            setError(err.message || "Bir hata oluştu")
+            setError(translateAuthError(err))
         } finally {
             setLoading(false)
         }

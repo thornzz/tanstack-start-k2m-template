@@ -1,9 +1,8 @@
 import { convexAuth } from "@convex-dev/auth/server";
-import { Password } from "@convex-dev/auth/providers/Password";
-import { DataModel } from "./_generated/dataModel";
+import { CustomPassword } from "./CustomPassword";
 
-// Custom Password provider - signup'ta name field'ı kaydeder
-const CustomPassword = Password<DataModel>({
+// CustomPassword provider'ı kullan - ConvexError ile hata kodları client'a gönderilir
+const PasswordProvider = CustomPassword({
     profile(params) {
         return {
             email: params.email as string,
@@ -13,5 +12,5 @@ const CustomPassword = Password<DataModel>({
 });
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-    providers: [CustomPassword],
+    providers: [PasswordProvider],
 });
