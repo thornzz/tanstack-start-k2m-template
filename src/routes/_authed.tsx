@@ -73,6 +73,9 @@ function AuthedContent() {
                     <Link to="/users" className="[&.active]:text-cyan-400 text-gray-300 hover:text-cyan-400 transition-colors font-medium">
                         Kullanıcılar
                     </Link>
+                    <Link to="/files" className="[&.active]:text-cyan-400 text-gray-300 hover:text-cyan-400 transition-colors font-medium">
+                        Dosyalar
+                    </Link>
                 </div>
                 <div className="flex items-center gap-2">
                     {user === undefined && (

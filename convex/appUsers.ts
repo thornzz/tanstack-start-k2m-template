@@ -60,10 +60,10 @@ export const seed = mutation({
     args: {},
     handler: async (ctx) => {
         // Check if data already exists
-        const existing = await ctx.db.query("appUsers").first();
-        if (existing) {
-            return { message: "Data already exists", count: 0 };
-        }
+        // const existing = await ctx.db.query("appUsers").first();
+        // if (existing) {
+        //    return { message: "Data already exists", count: 0 };
+        // }
 
         // Turkish names for sample data
         const turkishNames = [
@@ -79,9 +79,11 @@ export const seed = mutation({
 
         const now = Date.now();
         let count = 0;
+        const targetCount = 10000;
 
-        for (const name of turkishNames) {
-            const email = name
+        for (let i = 0; i < targetCount; i++) {
+            const randomName = turkishNames[Math.floor(Math.random() * turkishNames.length)];
+            const email = randomName
                 .toLowerCase()
                 .replace(/ş/g, "s")
                 .replace(/ı/g, "i")
@@ -90,14 +92,14 @@ export const seed = mutation({
                 .replace(/ö/g, "o")
                 .replace(/ç/g, "c")
                 .replace(/ /g, ".")
-                + "@example.com";
+                + "." + i + "@example.com";
 
             await ctx.db.insert("appUsers", {
-                name,
+                name: randomName,
                 email,
                 role: roles[Math.floor(Math.random() * roles.length)],
                 status: statuses[Math.floor(Math.random() * 4) === 0 ? 1 : 0],
-                createdAt: now - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000),
+                createdAt: now - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000), // Last 1 year
                 updatedAt: now,
             });
             count++;

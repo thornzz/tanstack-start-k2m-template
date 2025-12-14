@@ -16,6 +16,7 @@ import {
 import { ConvexError } from "convex/values";
 import { Value } from "convex/values";
 import { DataModel } from "./_generated/dataModel";
+import { Scrypt } from "lucia";
 
 // Hata kodları - client'ta da kullanılacak
 export const AuthErrorCodes = {
@@ -142,12 +143,9 @@ export function CustomPassword(config: PasswordConfig = {}) {
         },
         crypto: {
             async hashSecret(password: string) {
-                // Lucia Scrypt kullan
-                const { Scrypt } = await import("lucia");
                 return await new Scrypt().hash(password);
             },
             async verifySecret(password: string, hash: string) {
-                const { Scrypt } = await import("lucia");
                 return await new Scrypt().verify(hash, password);
             },
         },

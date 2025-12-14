@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedFilesRouteImport } from './routes/_authed/files'
 import { Route as AuthedUsersIndexRouteImport } from './routes/_authed/users/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthedUsersUserIdRouteImport } from './routes/_authed/users/$userId'
@@ -36,6 +37,11 @@ const AuthedIndexRoute = AuthedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedFilesRoute = AuthedFilesRouteImport.update({
+  id: '/files',
+  path: '/files',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedUsersIndexRoute = AuthedUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -55,6 +61,7 @@ const AuthedUsersUserIdRoute = AuthedUsersUserIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/login': typeof LoginRoute
+  '/files': typeof AuthedFilesRoute
   '/': typeof AuthedIndexRoute
   '/users/$userId': typeof AuthedUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -63,6 +70,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/login': typeof LoginRoute
+  '/files': typeof AuthedFilesRoute
   '/': typeof AuthedIndexRoute
   '/users/$userId': typeof AuthedUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -73,6 +81,7 @@ export interface FileRoutesById {
   '/$': typeof SplatRoute
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authed/files': typeof AuthedFilesRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/users/$userId': typeof AuthedUsersUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -80,14 +89,29 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/$' | '/login' | '/' | '/users/$userId' | '/api/auth/$' | '/users'
+  fullPaths:
+    | '/$'
+    | '/login'
+    | '/files'
+    | '/'
+    | '/users/$userId'
+    | '/api/auth/$'
+    | '/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$' | '/login' | '/' | '/users/$userId' | '/api/auth/$' | '/users'
+  to:
+    | '/$'
+    | '/login'
+    | '/files'
+    | '/'
+    | '/users/$userId'
+    | '/api/auth/$'
+    | '/users'
   id:
     | '__root__'
     | '/$'
     | '/_authed'
     | '/login'
+    | '/_authed/files'
     | '/_authed/'
     | '/_authed/users/$userId'
     | '/api/auth/$'
@@ -131,6 +155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/files': {
+      id: '/_authed/files'
+      path: '/files'
+      fullPath: '/files'
+      preLoaderRoute: typeof AuthedFilesRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/users/': {
       id: '/_authed/users/'
       path: '/users'
@@ -156,12 +187,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedFilesRoute: typeof AuthedFilesRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedUsersUserIdRoute: typeof AuthedUsersUserIdRoute
   AuthedUsersIndexRoute: typeof AuthedUsersIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedFilesRoute: AuthedFilesRoute,
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedUsersUserIdRoute: AuthedUsersUserIdRoute,
   AuthedUsersIndexRoute: AuthedUsersIndexRoute,
