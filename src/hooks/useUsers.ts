@@ -4,7 +4,8 @@ import { convexQuery } from '@convex-dev/react-query'
 import { api } from '../../convex/_generated/api'
 import { QUERY_KEYS } from '../constants'
 import type { Id } from '../../convex/_generated/dataModel'
-import { useState, useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useEffect } from 'react'
+import { useSearch, useNavigate } from '@tanstack/react-router'
 
 /**
  * Convex API ile kullanıcı verileri için custom hook'lar
@@ -66,14 +67,27 @@ const DEFAULT_PAGE_SIZE = 25
 
 /**
  * Kullanıcı listesi hook'u - Convex usePaginatedQuery ile
- * Cursor yönetimi Convex tarafından otomatik yapılır
+ * URL search params kullanarak state'i persist eder
  */
 export function useUserSearch() {
-    const [searchTerm, setSearchTerm] = useState('')
-    const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
+    // URL'den state al
+    const searchParams = useSearch({ from: '/_authed/users/' })
+    const navigate = useNavigate({ from: '/users' })
 
-    // Sayfa indeksi (manuel next/prev için)
-    const [displayPageIndex, setDisplayPageIndex] = useState(0)
+    // URL'den değerleri al (default değerlerle)
+    const searchTerm = searchParams.search ?? ''
+    const pageSize = searchParams.pageSize ?? DEFAULT_PAGE_SIZE
+    const displayPageIndex = searchParams.page ?? 0
+
+    // URL'i güncelle
+    const updateUrl = useCallback((updates: { page?: number; pageSize?: number; search?: string }) => {
+        navigate({
+            search: (prev) => ({
+                ...prev,
+                ...updates,
+            }),
+        })
+    }, [navigate])
 
     // Convex usePaginatedQuery - Cursor'ları otomatik yönetir
     // Search varsa search query kullan, yoksa list query
@@ -107,6 +121,15 @@ export function useUserSearch() {
         return results.slice(startIndex, endIndex)
     }, [results, startIndex, endIndex])
 
+    // Gerekli verileri önceden yükle
+    useEffect(() => {
+        // Eğer mevcut sayfa için yeterli veri yoksa yükle
+        if (results.length < endIndex && status === "CanLoadMore") {
+            const neededItems = endIndex - results.length
+            loadMore(Math.max(neededItems, pageSize))
+        }
+    }, [displayPageIndex, pageSize, results.length, endIndex, status, loadMore])
+
     // Sonraki sayfa
     const nextPage = useCallback(() => {
         const nextEndIndex = (displayPageIndex + 1) * pageSize + pageSize
@@ -118,28 +141,26 @@ export function useUserSearch() {
 
         // Sadece daha fazla veri varsa sayfayı değiştir
         if (results.length > endIndex || status === "CanLoadMore") {
-            setDisplayPageIndex(prev => prev + 1)
+            updateUrl({ page: displayPageIndex + 1 })
         }
-    }, [displayPageIndex, pageSize, results.length, endIndex, status, loadMore])
+    }, [displayPageIndex, pageSize, results.length, endIndex, status, loadMore, updateUrl])
 
     // Önceki sayfa
     const prevPage = useCallback(() => {
         if (displayPageIndex > 0) {
-            setDisplayPageIndex(prev => prev - 1)
+            updateUrl({ page: displayPageIndex - 1 })
         }
-    }, [displayPageIndex])
+    }, [displayPageIndex, updateUrl])
 
     // Search değiştiğinde sıfırla
     const handleSetSearchTerm = useCallback((term: string) => {
-        setSearchTerm(term)
-        setDisplayPageIndex(0)
-    }, [])
+        updateUrl({ search: term, page: 0 })
+    }, [updateUrl])
 
     // PageSize değiştiğinde sıfırla
     const handleSetPageSize = useCallback((size: number) => {
-        setPageSize(size)
-        setDisplayPageIndex(0)
-    }, [])
+        updateUrl({ pageSize: size, page: 0 })
+    }, [updateUrl])
 
     // canNext: Daha fazla veri var veya yüklenmiş veriler arasında gezinebilir
     const canNext = results.length > endIndex || status === "CanLoadMore"

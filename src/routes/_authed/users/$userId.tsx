@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '../../../../convex/_generated/api'
@@ -41,8 +41,12 @@ function UserDetailPage() {
                 <div className="max-w-4xl mx-auto text-center">
                     <h1 className="text-4xl font-bold text-red-400 mb-4">Kullanıcı Bulunamadı</h1>
                     <p className="text-gray-400 mb-8">ID: {userId} ile eşleşen kullanıcı bulunamadı.</p>
-                    <Button asChild variant="secondary" className="bg-slate-700 hover:bg-slate-600 text-white">
-                        <Link to="/users">← Kullanıcılara Dön</Link>
+                    <Button
+                        variant="secondary"
+                        className="bg-slate-700 hover:bg-slate-600 text-white"
+                        onClick={() => window.history.back()}
+                    >
+                        ← Kullanıcılara Dön
                     </Button>
                 </div>
             </div>
@@ -53,10 +57,12 @@ function UserDetailPage() {
         <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-8">
             <div className="max-w-4xl mx-auto">
                 <div className="flex items-center gap-4 mb-8">
-                    <Button asChild variant="secondary" className="bg-slate-700 hover:bg-slate-600 text-white">
-                        <Link to="/users">
-                            ← Geri
-                        </Link>
+                    <Button
+                        variant="secondary"
+                        className="bg-slate-700 hover:bg-slate-600 text-white"
+                        onClick={() => window.history.back()}
+                    >
+                        ← Geri
                     </Button>
                     <div>
                         <h1 className="text-4xl font-bold text-white">Kullanıcı Detayı</h1>
