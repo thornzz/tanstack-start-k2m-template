@@ -1,17 +1,51 @@
-
-import { createFileRoute, useRouter } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useAuthActions } from "@convex-dev/auth/react";
+import { createFileRoute, useRouter, useNavigate } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
+import { useAuthActions } from "@convex-dev/auth/react"
+import { Authenticated, AuthLoading } from 'convex/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Loader2 } from 'lucide-react'
 
 export const Route = createFileRoute('/login')({
     component: Login,
 })
 
 function Login() {
-    const { signIn } = useAuthActions();
+    return (
+        <>
+            <AuthLoading>
+                <LoadingScreen />
+            </AuthLoading>
+            <Authenticated>
+                <RedirectToHome />
+            </Authenticated>
+            {/* Unauthenticated durumunda form gösterilecek */}
+            <LoginForm />
+        </>
+    )
+}
+
+function LoadingScreen() {
+    return (
+        <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+        </div>
+    )
+}
+
+function RedirectToHome() {
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        navigate({ to: '/' })
+    }, [navigate])
+
+    return <LoadingScreen />
+}
+
+function LoginForm() {
+    const { signIn } = useAuthActions()
     const [isSignUp, setIsSignUp] = useState(false)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -25,23 +59,16 @@ function Login() {
         setLoading(true)
         setError(null)
 
-        const flow = isSignUp ? "signUp" : "signIn";
+        const flow = isSignUp ? "signUp" : "signIn"
 
         try {
-            await signIn("password", { email, password, name, flow })
-                .then(() => {
-                    console.log("Sign in successful!");
-                    window.alert("Giriş Başarılı!"); // Temporary alert to confirm execution
-                    setLoading(false)
-                    router.navigate({ to: '/' })
-                })
-                .catch((err) => {
-                    setLoading(false)
-                    setError(err.message)
-                });
+            // signUp ise name'i de gönder, değilse boş string
+            await signIn("password", { email, password, flow, name: isSignUp ? name : "" })
+            router.navigate({ to: '/' })
         } catch (err: any) {
-            setLoading(false)
             setError(err.message || "Bir hata oluştu")
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -49,10 +76,8 @@ function Login() {
         <div className="min-h-screen w-full flex bg-slate-50 dark:bg-slate-900">
             {/* Left Side - Form */}
             <div className="w-full lg:w-1/2 flex flex-col justify-center p-8 sm:p-12 lg:p-24 bg-white dark:bg-slate-950">
-
-                {/* Main Form Content */}
                 <div className="w-full max-w-sm mx-auto space-y-8">
-                    {/* Logo Area - Mobile only or top of form */}
+                    {/* Logo */}
                     <div className="flex items-center gap-2 mb-8">
                         <div className="w-8 h-8 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
                             <div className="w-4 h-4 bg-white/20 rounded-full" />
@@ -124,6 +149,9 @@ function Login() {
                             className="w-full h-11 bg-cyan-700 hover:bg-cyan-800 text-white shadow-sm transition-all"
                             disabled={loading}
                         >
+                            {loading ? (
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            ) : null}
                             {loading ? 'İşleniyor...' : isSignUp ? 'Hesap Oluştur' : 'Giriş Yap'}
                         </Button>
                     </form>

@@ -23,7 +23,7 @@ export const getConvexUsers = createServerFn({ method: 'GET' })
     .handler(async ({ data }) => {
         const client = getConvexClient()
 
-        const result = await client.query(api.users.get, {
+        const result = await client.query(api.appUsers.get, {
             page: data.page,
             pageSize: data.pageSize,
             search: data.search,

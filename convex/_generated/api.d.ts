@@ -8,8 +8,10 @@
  * @module
  */
 
+import type * as appUsers from "../appUsers.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as passwordChange from "../passwordChange.js";
 import type * as users from "../users.js";
 
 import type {
@@ -19,8 +21,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  appUsers: typeof appUsers;
   auth: typeof auth;
   http: typeof http;
+  passwordChange: typeof passwordChange;
   users: typeof users;
 }>;
 

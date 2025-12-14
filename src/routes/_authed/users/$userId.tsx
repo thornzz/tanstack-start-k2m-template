@@ -23,7 +23,7 @@ function UserDetailPage() {
     const { user: authUser } = Route.useRouteContext() as { user: AuthUser }
 
     const { data: user, isLoading, error } = useQuery({
-        ...convexQuery(api.users.getById, { id: userId as Id<"appUsers"> }),
+        ...convexQuery(api.appUsers.getById, { id: userId as Id<"appUsers"> }),
         enabled: !!userId,
     })
 

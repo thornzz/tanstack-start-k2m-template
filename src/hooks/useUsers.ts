@@ -30,7 +30,7 @@ export type ConvexAppUser = {
  */
 export function useUsers(page: number = 1, pageSize: number = 50, search: string = '') {
     const query = useQuery({
-        ...convexQuery(api.users.get, { page, pageSize, search }),
+        ...convexQuery(api.appUsers.get, { page, pageSize, search }),
         refetchInterval: 60 * 1000,
         placeholderData: (previousData: any) => previousData,
     })
@@ -52,7 +52,7 @@ export function useUsers(page: number = 1, pageSize: number = 50, search: string
  */
 export function useUserById(userId: string | undefined) {
     const query = useQuery({
-        ...convexQuery(api.users.getById, { id: userId as Id<"appUsers"> }),
+        ...convexQuery(api.appUsers.getById, { id: userId as Id<"appUsers"> }),
         enabled: !!userId,
     })
 
