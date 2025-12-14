@@ -9,31 +9,41 @@ import { Button } from './ui/button'
  */
 export function UserList() {
     const {
-        users, // changed from filteredUsers
+        users,
         searchTerm,
         setSearchTerm,
-        page,
-        setPage,
+
+        pageIndex,
         pageSize,
         setPageSize,
-        meta,
+        totalCount,
+
+        nextPage,
+        prevPage,
+        canNext,
+        canPrev,
+
         isLoading,
+        isFetching,
         error,
     } = useUserSearch()
 
     if (error) {
         return (
             <div className="p-4 bg-red-100 text-red-700 rounded-lg">
-                Hata: {error.message}
+                Hata: {error instanceof Error ? error.message : "Bilinmeyen hata"}
             </div>
         )
     }
 
+    const pageSizeOptions = [25, 50, 100, 250, 500, 1000];
+
     return (
         <div className="space-y-6">
-            {/* Arama ve Sayfalama Üst Bar */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                <div className="relative w-full sm:w-96">
+            {/* Top Bar: Search & Page Size & Count */}
+            <div className="flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center">
+                {/* Search */}
+                <div className="relative w-full xl:w-96">
                     <input
                         type="text"
                         placeholder="İsim veya e-posta ile ara..."
@@ -54,32 +64,92 @@ export function UserList() {
                     )}
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-400">Sayfa başına:</span>
-                    <select
-                        value={pageSize}
-                        onChange={(e) => setPageSize(Number(e.target.value))}
-                        className="bg-slate-800 border-slate-700 text-white rounded-lg px-2 py-1.5 focus:ring-2 focus:ring-cyan-500/50 outline-none"
-                    >
-                        <option value={50}>50</option>
-                        <option value={100}>100</option>
-                        <option value={250}>250</option>
-                        <option value={500}>500</option>
-                    </select>
+                {/* Controls */}
+                <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto justify-between xl:justify-end">
+
+                    {/* Total Count Display */}
+                    {!searchTerm && (
+                        <div className="text-slate-400 text-sm font-medium px-3 py-1.5 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                            Toplam: <span className="text-cyan-400">{totalCount}</span> Kullanıcı
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm text-slate-400 hidden sm:inline">Sayfa Başına:</span>
+                        <select
+                            value={pageSize}
+                            onChange={(e) => setPageSize(Number(e.target.value))}
+                            className="bg-slate-800 border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500/50 outline-none cursor-pointer hover:bg-slate-700 transition-colors"
+                        >
+                            {pageSizeOptions.map(size => (
+                                <option key={size} value={size}>{size}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-slate-800 p-1 rounded-lg border border-slate-700">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={prevPage}
+                            disabled={!canPrev || isLoading}
+                            className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </Button>
+
+                        <div className="px-3 min-w-[3rem] text-center font-mono text-sm font-bold text-white">
+                            {pageIndex + 1}
+                        </div>
+
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={nextPage}
+                            disabled={!canNext || isLoading}
+                            className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-30"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </Button>
+                    </div>
                 </div>
             </div>
 
             {/* Kullanıcı listesi */}
-            <div className="min-h-[300px]">
-                {users.length === 0 && !isLoading ? (
+            <div className="min-h-[300px] relative">
+                {/* Loading overlay for page transitions */}
+                {isFetching && !isLoading && (
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500" />
+                            <span className="text-cyan-400 text-sm font-medium">Yükleniyor...</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Initial loading state */}
+                {isLoading && (
+                    <div className="flex items-center justify-center py-12 bg-slate-800/50 rounded-xl border border-slate-700">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-500" />
+                            <span className="text-slate-400">Kullanıcılar yükleniyor...</span>
+                        </div>
+                    </div>
+                )}
+
+                {(!users || users.length === 0) && !isLoading ? (
                     <div className="text-center py-12 bg-slate-800/50 rounded-xl border border-dashed border-slate-700">
                         <p className="text-slate-400">
                             {searchTerm ? 'Aradığınız kriterlere uygun kullanıcı bulunamadı.' : 'Henüz kullanıcı yok.'}
                         </p>
                     </div>
-                ) : (
+                ) : !isLoading && (
                     <div className="grid gap-3">
-                        {users.map((user: any) => (
+                        {users?.map((user: any) => (
                             <div
                                 key={user._id}
                                 className="group p-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-cyan-500/30 rounded-xl transition-all duration-200"
@@ -137,35 +207,10 @@ export function UserList() {
                 )}
             </div>
 
-            {/* Pagination Info & Controls */}
-            {meta && (
-                <div className="flex items-center justify-between border-t border-slate-700/50 pt-4">
-                    <div className="text-sm text-slate-400">
-                        Top <span className="text-white font-medium">{meta.total}</span> kullanıcıdan <span className="text-white font-medium">{((page - 1) * pageSize) + 1}</span> - <span className="text-white font-medium">{Math.min(page * pageSize, meta.total)}</span> arası gösteriliyor
-                    </div>
-                    <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                            disabled={page === 1 || isLoading}
-                            className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
-                        >
-                            Önceki
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPage(p => p + 1)}
-                            disabled={page >= (meta.totalPages || 1) || isLoading}
-                            className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
-                        >
-                            Sonraki
-                        </Button>
-                    </div>
-                </div>
-            )}
+            {/* Bottom Pagination Info */}
+            <div className="text-center text-xs text-slate-500 border-t border-slate-800 pt-4">
+                {searchTerm ? 'Arama Sonuçları' : 'Tüm Kullanıcılar'} &bull; Sayfa {pageIndex + 1}
+            </div>
         </div>
     )
 }
-

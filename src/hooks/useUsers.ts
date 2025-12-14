@@ -1,9 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { usePaginatedQuery } from 'convex/react'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '../../convex/_generated/api'
 import { QUERY_KEYS } from '../constants'
 import type { Id } from '../../convex/_generated/dataModel'
-import { useState, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 
 /**
  * Convex API ile kullanıcı verileri için custom hook'lar
@@ -23,28 +24,6 @@ export type ConvexAppUser = {
     status: string
     createdAt: number
     updatedAt: number
-}
-
-/**
- * Tüm kullanıcıları getiren hook
- */
-export function useUsers(page: number = 1, pageSize: number = 50, search: string = '') {
-    const query = useQuery({
-        ...convexQuery(api.appUsers.get, { page, pageSize, search }),
-        refetchInterval: 60 * 1000,
-        placeholderData: (previousData: any) => previousData,
-    })
-
-    return {
-        users: query.data?.users ?? [],
-        meta: query.data?.meta,
-        isLoading: query.isLoading,
-        isFetching: query.isFetching,
-        error: query.error,
-        refetch: query.refetch,
-        isError: query.isError,
-        isSuccess: query.isSuccess,
-    }
 }
 
 /**
@@ -82,31 +61,119 @@ export function useUserMutations() {
     }
 }
 
+// Default pagination - Convex'in default değeri 
+const DEFAULT_PAGE_SIZE = 25
+
 /**
- * Kullanıcı listesi hook'u - Sayfalama ve Arama
+ * Kullanıcı listesi hook'u - Convex usePaginatedQuery ile
+ * Cursor yönetimi Convex tarafından otomatik yapılır
  */
 export function useUserSearch() {
-    const [page, setPage] = useState(1)
-    const [pageSize, setPageSize] = useState(50)
     const [searchTerm, setSearchTerm] = useState('')
+    const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
 
-    const { users, meta, isLoading, error } = useUsers(page, pageSize, searchTerm)
+    // Sayfa indeksi (manuel next/prev için)
+    const [displayPageIndex, setDisplayPageIndex] = useState(0)
 
-    // Reset page when search changes
-    useMemo(() => {
-        if (searchTerm) setPage(1)
-    }, [searchTerm])
+    // Convex usePaginatedQuery - Cursor'ları otomatik yönetir
+    // Search varsa search query kullan, yoksa list query
+    const listPagination = usePaginatedQuery(
+        api.appUsers.list,
+        searchTerm ? "skip" : {},
+        { initialNumItems: pageSize }
+    )
+
+    const searchPagination = usePaginatedQuery(
+        api.appUsers.search,
+        searchTerm ? { search: searchTerm } : "skip",
+        { initialNumItems: pageSize }
+    )
+
+    // Aktif pagination'ı seç
+    const activePagination = searchTerm ? searchPagination : listPagination
+
+    const { results, status, loadMore } = activePagination
+
+    // Total count (ayrı query)
+    const countQuery = useQuery({
+        ...convexQuery(api.appUsers.count, { search: searchTerm || undefined }),
+    })
+    const totalCount = countQuery.data ?? 0
+
+    // Sayfa başına gösterilecek kullanıcıları hesapla
+    const startIndex = displayPageIndex * pageSize
+    const endIndex = startIndex + pageSize
+    const currentPageUsers = useMemo(() => {
+        return results.slice(startIndex, endIndex)
+    }, [results, startIndex, endIndex])
+
+    // Sonraki sayfa
+    const nextPage = useCallback(() => {
+        const nextEndIndex = (displayPageIndex + 1) * pageSize + pageSize
+
+        // Eğer sonraki sayfa için yeterli veri yoksa yükle
+        if (results.length < nextEndIndex && status === "CanLoadMore") {
+            loadMore(pageSize)
+        }
+
+        // Sadece daha fazla veri varsa sayfayı değiştir
+        if (results.length > endIndex || status === "CanLoadMore") {
+            setDisplayPageIndex(prev => prev + 1)
+        }
+    }, [displayPageIndex, pageSize, results.length, endIndex, status, loadMore])
+
+    // Önceki sayfa
+    const prevPage = useCallback(() => {
+        if (displayPageIndex > 0) {
+            setDisplayPageIndex(prev => prev - 1)
+        }
+    }, [displayPageIndex])
+
+    // Search değiştiğinde sıfırla
+    const handleSetSearchTerm = useCallback((term: string) => {
+        setSearchTerm(term)
+        setDisplayPageIndex(0)
+    }, [])
+
+    // PageSize değiştiğinde sıfırla
+    const handleSetPageSize = useCallback((size: number) => {
+        setPageSize(size)
+        setDisplayPageIndex(0)
+    }, [])
+
+    // canNext: Daha fazla veri var veya yüklenmiş veriler arasında gezinebilir
+    const canNext = results.length > endIndex || status === "CanLoadMore"
+    // canPrev: İlk sayfada değilsek
+    const canPrev = displayPageIndex > 0
+
+    // isLoading durumları
+    const isLoading = status === "LoadingFirstPage"
+    const isFetching = status === "LoadingMore"
 
     return {
-        users,
-        meta,
+        users: currentPageUsers,
         searchTerm,
-        setSearchTerm,
-        page,
-        setPage,
+        setSearchTerm: handleSetSearchTerm,
+
+        // Pagination
+        pageIndex: displayPageIndex,
         pageSize,
-        setPageSize,
+        setPageSize: handleSetPageSize,
+        totalCount,
+
+        nextPage,
+        prevPage,
+        canNext,
+        canPrev,
+
+        // Status
         isLoading,
-        error,
+        isFetching,
+        status,
+
+        // LoadMore (infinite scroll için)
+        loadMore: () => status === "CanLoadMore" && loadMore(pageSize),
+
+        error: null as Error | null
     }
 }

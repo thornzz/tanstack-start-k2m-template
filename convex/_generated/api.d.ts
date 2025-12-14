@@ -11,6 +11,7 @@
 import type * as CustomPassword from "../CustomPassword.js";
 import type * as appUsers from "../appUsers.js";
 import type * as auth from "../auth.js";
+import type * as counters from "../counters.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as passwordChange from "../passwordChange.js";
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   CustomPassword: typeof CustomPassword;
   appUsers: typeof appUsers;
   auth: typeof auth;
+  counters: typeof counters;
   files: typeof files;
   http: typeof http;
   passwordChange: typeof passwordChange;

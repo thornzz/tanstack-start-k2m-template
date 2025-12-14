@@ -19,5 +19,15 @@ export default defineSchema({
         status: v.string(),     // "Aktif" | "Pasif"
         createdAt: v.number(),  // timestamp in milliseconds
         updatedAt: v.number(),
-    }).index("by_email", ["email"]),
+    })
+        .index("by_email", ["email"])
+        .index("by_createdAt", ["createdAt"])  // Pagination için sıralama index'i
+        .searchIndex("search_name_email", {
+            searchField: "name",
+            filterFields: ["email"],
+        }),
+    counters: defineTable({
+        key: v.string(),
+        value: v.number(),
+    }).index("by_key", ["key"]),
 });
